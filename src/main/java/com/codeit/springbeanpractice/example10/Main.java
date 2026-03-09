@@ -1,0 +1,23 @@
+package com.codeit.springbeanpractice.example10;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
+@SpringBootApplication // 스프링 부트 애플리케이션 시작 클래스
+public class Main {
+
+    public static void main(String[] args) {
+
+        // 스프링 애플리케이션 실행 + 스프링 컨테이너(ApplicationContext) 생성
+        ApplicationContext context =
+                SpringApplication.run(Main.class, args);
+
+        // 스프링 컨테이너에 등록된 OrderService 빈 조회
+        OrderService orderService =
+                context.getBean(OrderService.class);
+
+        // OrderService의 메서드 호출
+        orderService.hello();
+    }
+}
