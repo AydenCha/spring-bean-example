@@ -88,6 +88,17 @@ my:
     - host: local.example.com
       port: 8888
 
+  database:
+    # example13: 과제 1 - DatabaseProperties 설정
+    url: jdbc:mysql://localhost:3306/mydb
+    username: admin
+    maxConnections: 50
+    # example13: 과제 2 - List 바인딩
+    allowedIps:
+      - 192.168.0.1
+      - 192.168.0.2
+      - 10.0.0.1
+
 server:
   # 서버 포트 번호 (기본값 8080)
   # example14에서 Environment.getProperty("server.port")로 조회됨
@@ -98,9 +109,6 @@ config:
   timeout: 3000
 
 custom:
-  # example14: 과제 2 - PropertySource 우선순위 테스트
-  key: value-from-yml
-
   # example16: FeatureXEnabledCondition에서 조건 확인
   # custom.feature-x=true 일 때만 FeatureService Bean이 등록됨
   # false이면 FeatureService는 빈으로 등록되지 않아 getBean 시 예외 발생

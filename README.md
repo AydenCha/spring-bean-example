@@ -43,6 +43,11 @@ src/main/java/com/codeit/springbeanpractice/example01/SpringBeanPracticeApplicat
 - `AnnotationConfigApplicationContext`: Java 설정 기반 컨테이너 생성
 - Bean 이름은 **메서드 이름**이 기본값
 
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example01은 순수 Spring 컨테이너를 직접 생성하는 예제입니다
+- 과제에서 새로운 Bean을 추가할 수 있습니다
+
 ### 직접 해보기
 
 #### 과제 1: 새로운 Bean 추가하기
@@ -146,6 +151,11 @@ example02/SpringBeanPracticeApplication.java 실행
 - `@Bean` 메서드를 다른 `@Bean` 메서드에서 호출해도 **항상 같은 인스턴스 반환**
 - 프록시가 메서드 호출을 가로채서 컨테이너에서 Bean을 조회
 
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example02는 @Configuration의 CGLIB 프록시를 학습하는 예제입니다
+- 과제에서 코드를 추가할 수 있습니다
+
 ### 직접 해보기
 
 #### 과제 1: 싱글톤 확인하기
@@ -244,6 +254,12 @@ example03/SpringBeanPracticeApplication.java 실행
 - import는 컴파일 시점의 참조일 뿐, 스캔과 무관
 - 스캔은 **클래스패스**와 **애노테이션** 기준
 
+### 실행 전 준비
+**CRITICAL BUG - 이미 수정됨**:
+- ⚠️ 이전에 MemberRepository.java가 전체 주석 처리되어 있어서 실행 시 NoSuchBeanDefinitionException 발생했습니다
+- 현재는 수정되어 정상 작동합니다
+- 과제에서 ComponentScan 범위를 수정할 수 있지만, **테스트 후 원래대로 복구**하세요
+
 ### 직접 해보기
 
 #### 과제 1: 스캔 범위 축소
@@ -317,6 +333,11 @@ example04/SpringBeanPracticeApplication.java 실행
 - `excludeFilters`: 스캔 대상에서 특정 클래스 제외
 - `FilterType.REGEX`: 정규식으로 FQCN(Full Qualified Class Name) 매칭
 - `FilterType.ASSIGNABLE_TYPE`: 특정 클래스 타입 지정
+
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example04는 ComponentScan의 excludeFilters를 학습하는 예제입니다
+- 과제에서 excludeFilters를 수정할 수 있지만, **테스트 후 원래대로 복구**하세요
 
 ### 직접 해보기
 
@@ -412,6 +433,12 @@ example05/SpringBeanPracticeApplication.java 실행
 - Auto Configuration: 스프링 부트가 자동으로 등록하는 수십~수백 개의 Bean
 - 사용자 정의 @Bean으로 자동 설정 Bean을 오버라이드 가능
 
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example05는 Spring Boot의 자동 설정과 커스텀 Bean을 학습하는 예제입니다
+- 커스텀 ObjectMapper Bean은 `application.yml`의 `spring.jackson.serialization.indent-output` 설정을 존중합니다
+- 과제 3-4에서 커스텀 Bean을 주석 처리할 수 있지만, **테스트 후 원래대로 복구**하세요
+
 ### 직접 해보기
 
 #### 과제 1: 모든 Bean 이름 확인
@@ -469,13 +496,22 @@ Arrays.stream(context.getBeanDefinitionNames())
 
 1. `CustomWebConfig.java` 확인:
 ```java
+@Value("${spring.jackson.serialization.indent-output:false}")
+private boolean indentOutput;
+
 @Bean
 public ObjectMapper objectMapper() {
     ObjectMapper mapper = new ObjectMapper();
-    mapper.enable(SerializationFeature.INDENT_OUTPUT);  // 예쁘게 출력
+    if (indentOutput) {
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);  // properties가 true면 들여쓰기
+    } else {
+        mapper.disable(SerializationFeature.INDENT_OUTPUT);  // properties가 false면 한 줄
+    }
     return mapper;
 }
 ```
+   - application.yml의 설정을 읽어서 ObjectMapper에 적용
+   - 커스텀 Bean도 properties 설정을 존중함
 
 2. `SpringBeanPracticeApplication.java`의 main 메서드에 ObjectMapper 테스트 코드 추가:
 ```java
@@ -504,17 +540,19 @@ try {
      ```
    - INDENT_OUTPUT이 적용되어 보기 좋게 출력됨
 
-4. CustomWebConfig의 @Bean 주석 처리 후 재실행:
+4. CustomWebConfig의 @Bean 메서드 전체를 주석 처리 후 재실행:
 ```java
 // @Bean
 // public ObjectMapper objectMapper() {
+//     ...
+// }
 ```
 
 5. 실행
-   - **기대 출력**: `{"name":"홍길동","age":30}` (한 줄로 출력)
-   - 기본 ObjectMapper가 사용됨
+   - **기대 출력**: `{"name":"홍길동","age":30}` (한 줄로 출력) → **단, `application.yml`에 `spring.jackson.serialization.indent-output: true`가 있으면** Boot가 만드는 기본 ObjectMapper에도 indent가 적용되어 들여쓰기된 JSON이 나옵니다. 한 줄 출력을 보려면 이 테스트 동안만 `application.yml`에서 `indent-output: false`로 바꾸거나 해당 항목을 주석 처리한 뒤 실행하세요.
+   - 학습 포인트: 커스텀 @Bean을 제거하면 Boot 자동 설정의 ObjectMapper가 쓰이고, 그 설정은 `application.yml`의 `spring.jackson.*` 값을 따릅니다.
 
-6. @Bean 주석 해제하여 복구
+6. @Bean 주석 해제하고, 필요하면 `application.yml`의 indent 설정도 원래대로 복구
 
 #### 과제 4: @SpringBootApplication에서 자동 설정 제외
 **목표**: 특정 자동 설정을 끄는 방법 이해
@@ -606,6 +644,11 @@ src/main/java/com/codeit/springbeanpractice/example06/Main.java
 - **생성자가 1개**면 `@Autowired` 생략 가능
 - `final` 필드 사용으로 **불변성** 보장
 - Controller → Service 의존 관계
+
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example06은 생성자 주입을 학습하는 예제입니다
+- 과제에서 MemberRepository를 추가하고 Service를 수정할 수 있습니다
 
 ### 직접 해보기
 
@@ -714,6 +757,11 @@ example07/Application.java 실행
 - `Optional.orElseThrow()`: 값이 없으면 예외 발생
 - Repository는 Service를 의존하면 안 됨 (계층 역전)
 
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example07은 Repository 패턴을 학습하는 예제입니다
+- 과제에서 MapBookRepository를 활성화하고 MemoryBookRepository에 @Primary를 추가할 수 있지만, **테스트 후 원래대로 복구**하세요
+
 ### 직접 해보기
 
 #### 과제 1: MapBookRepository 활성화하기
@@ -797,6 +845,12 @@ example08/PokemonApplication.java 실행
 - **@Resource**: JSR-250 표준, 이름 기준 주입
 - **Map<String, T>**: key = Bean 이름, value = 구현체
 - **Set<T>**: 모든 구현체를 Set으로 주입
+
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example08은 동일 타입 Bean 여러 개를 주입하는 방법을 학습하는 예제입니다
+- 과제 1에서 Pikachu에 @Primary를 추가하고 PokemonService의 @Qualifier를 제거할 수 있지만, **테스트 후 원래대로 복구**하세요
+- 과제 3에서 Bulbasaur를 추가하면 Map과 Set에 자동으로 포함됩니다
 
 ### 직접 해보기
 
@@ -912,6 +966,12 @@ example09/Main.java 실행
 - `Optional<T>`: Bean이 있으면 Optional에 담김, 없으면 Optional.empty() 주입
 - `@Autowired(required=false)`: Bean이 없으면 주입하지 않음 (null)
 - `@Nullable`: Bean이 없어도 null 주입 허용
+
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example09는 선택적 의존성 주입을 학습하는 예제입니다
+- 과제 2에서 NotificationService의 @Service를 주석 처리할 수 있지만, **테스트 후 반드시 복구**하세요
+- 과제 3, 4에서 DependencyService를 수정할 때도 **완료 후 Optional<> 방식으로 복구**하세요
 
 ### 직접 해보기
 
@@ -1092,6 +1152,13 @@ example10/Main.java 실행
 - **session**: HTTP 세션당 1개 인스턴스
 - **proxyMode**: 싱글톤 Bean에 session/request 스코프 Bean을 주입하기 위해 필요
 
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example10은 Bean 스코프와 프록시 패턴을 학습하는 예제입니다
+- 별도의 application.yml 설정 변경이 필요하지 않습니다
+- **중요**: 과제 1 완료 후 SessionScopeBean의 스코프를 session으로 되돌리세요
+- 과제 2에서 proxyMode를 제거하면 오류가 발생합니다 (학습 목적)
+
 ### 직접 해보기
 
 #### 과제 1: prototype 스코프로 변경
@@ -1177,6 +1244,13 @@ example11/Main.java 실행
 1. `@Bean(initMethod="메서드명", destroyMethod="메서드명")`
 2. `InitializingBean`, `DisposableBean` 인터페이스 구현
 3. `@PostConstruct`, `@PreDestroy` 애노테이션 (권장)
+
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example11은 Bean 생명주기 콜백을 학습하는 예제입니다
+- 별도의 application.yml 설정 변경이 필요하지 않습니다
+- **주의**: 소멸 콜백(`@PreDestroy`, `destroyMethod`)은 애플리케이션 종료 시 실행됩니다
+  - IDE에서 실행 후 중지 버튼을 누르면 콘솔에서 소멸 메시지를 확인할 수 있습니다
 
 ### 직접 해보기
 
@@ -1323,6 +1397,12 @@ example12/Main.java 실행
 - `@Value("${key:기본값}")`: 값이 없을 때 기본값 사용
 - `@Value("#{표현식}")`: SpEL로 연산, 메서드 호출 가능
 - `@Value("#{'${key}'.split(',')}")`: 문자열을 리스트로 변환
+
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example12는 application.yml의 기존 설정을 @Value로 주입하는 예제입니다
+- 필요한 설정값들(`server.port`, `config.timeout`, `my.servers` 등)이 이미 정의되어 있습니다
+- 과제에서 설정 값을 변경하거나 주석 처리할 수 있지만, **테스트 후 원래대로 복구**하세요
 
 ### 직접 해보기
 
@@ -1508,6 +1588,12 @@ example13/Main.java 실행
 - Setter 기반 바인딩 (setter 메서드 필요)
 - 타입 안전한 설정 관리
 
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example13은 application.yml의 기존 설정을 바인딩하는 예제입니다
+- 이미 필요한 설정값들(`my.service`, `my.storage`, `my.auth` 등)이 application.yml에 정의되어 있습니다
+- 과제에서 `my.database` 설정을 추가할 수 있지만, 이는 학습 목적입니다
+
 ### 직접 해보기
 
 #### 과제 1: 새로운 설정 클래스 만들기
@@ -1621,6 +1707,12 @@ example14/AutoConfigurationSourceApplication.java 실행
 - `ApplicationContextInitializer`: 컨테이너 초기화 직전에 실행되는 훅(hook)
 - `PropertySource`: 설정 값의 출처 (application.yml, 환경변수, 코드 등)
 - `addFirst()`: 최우선 순위로 PropertySource 추가 (같은 키가 있으면 덮어씀)
+
+### 실행 전 준비
+**특별한 설정 필요 없음**:
+- example14는 코드에서 직접 PropertySource를 추가하는 예제입니다
+- 과제 2에서 application.yml에 `custom.key`를 추가할 수 있지만, 이는 테스트 목적입니다
+- 과제 완료 후 추가한 설정은 제거하는 것을 권장합니다
 
 ### 직접 해보기
 

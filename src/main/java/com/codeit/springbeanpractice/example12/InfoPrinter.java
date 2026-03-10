@@ -27,6 +27,10 @@ public class InfoPrinter {
     @Value("#{'${my.servers}'.split(',')}")
     private List<String> servers;
 
+    // 과제 3: SpEL 조건식
+    @Value("#{${config.timeout} > 3000 ? '높음' : '낮음'}")
+    private String timeoutLevel;
+
     public void print() {
         System.out.println(message); // 주입된 메시지 출력
     }
@@ -45,5 +49,9 @@ public class InfoPrinter {
 
     public void printServers() {
         System.out.println(servers);
+    }
+
+    public void printTimeoutLevel() {
+        System.out.println(timeoutLevel);
     }
 }

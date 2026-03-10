@@ -17,6 +17,13 @@ public class GreetingService {
     @Value("${custom.key}")
     private String customKey;
 
+    // 과제 3: 여러 개의 설정 값 추가
+    @Value("${custom.name}")
+    private String name;
+
+    @Value("${custom.age}")
+    private int age;
+
     public GreetingService(Environment environment) {
         this.environment = environment;
     }
@@ -25,6 +32,10 @@ public class GreetingService {
 
         // 과제 1: 코드로 추가한 설정 값 출력
         System.out.println("custom.key = " + customKey);
+
+        // 과제 3: 여러 개의 설정 값 출력
+        System.out.println("custom.name = " + name);
+        System.out.println("custom.age = " + age);
 
         // application.yml 에서 설정한 server.port 값 조회
         String port = environment.getProperty("server.port");

@@ -32,8 +32,35 @@ public class Main {
         AuthProperties authProperties =
                 context.getBean(AuthProperties.class);
 
+        DatabaseProperties databaseProperties =
+                context.getBean(DatabaseProperties.class);
+
         // 브레이크 포인트를 걸고
         // 설정 값이 정상적으로 바인딩되었는지 확인하기 위한 출력
-        System.out.println(myServiceProperties);
+        System.out.println("\n=== MyServiceProperties ===");
+        System.out.println("Service Name: " + myServiceProperties.getName());
+        System.out.println("Service Port: " + myServiceProperties.getPort());
+        System.out.println("Service Enabled: " + myServiceProperties.isEnabled());
+
+        System.out.println("\n=== StorageProperties ===");
+        System.out.println("Storage Path: " + storageProperties.getPath());
+        System.out.println("S3 Bucket: " + storageProperties.getS3().getBucket());
+        System.out.println("S3 Region: " + storageProperties.getS3().getRegion());
+
+        System.out.println("\n=== AuthProperties ===");
+        System.out.println("Client ID: " + authProperties.getClientId());
+        System.out.println("Retry Count: " + authProperties.getRetryCount());
+
+        System.out.println("\n=== MySettings (Map) ===");
+        System.out.println("Settings: " + mySettings.getSettings());
+
+        System.out.println("\n=== HostListProperties (List) ===");
+        System.out.println("Host List: " + hostListProperties.getHosts());
+
+        System.out.println("\n=== DatabaseProperties (과제 1, 2) ===");
+        System.out.println("DB URL: " + databaseProperties.getUrl());
+        System.out.println("DB Username: " + databaseProperties.getUsername());
+        System.out.println("DB MaxConnections: " + databaseProperties.getMaxConnections());
+        System.out.println("허용된 IP: " + databaseProperties.getAllowedIps());
     }
 }

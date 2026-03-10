@@ -54,6 +54,8 @@ public class AutoConfigurationSourceApplication
         // 코드로 property(key-value)를 직접 만들어서 추가할 맵
         Map<String, Object> map = new HashMap<>();
         map.put("custom.key", "value-from-code");
+        map.put("custom.name", "홍길동");
+        map.put("custom.age", "30");
         // custom.key라는 설정을 코드에서 주입
         // → @Value("${custom.key}") 같은 곳에서 사용 가능
 
@@ -66,5 +68,12 @@ public class AutoConfigurationSourceApplication
         env.getPropertySources().addFirst(propertySource);
         // addFirst → 같은 key가 다른 곳(application.yml, 시스템 환경변수 등)에 있어도
         // 여기서 넣은 값이 "우선" 적용됨(덮어씀)
+
+        // 과제 4: 시스템 환경변수 가져오기
+        String javaHome = env.getProperty("JAVA_HOME");
+        System.out.println("JAVA_HOME = " + javaHome);
+
+        String osName = env.getProperty("os.name");
+        System.out.println("OS Name = " + osName);
     }
 }

@@ -35,6 +35,11 @@ public class HostListProperties {
         public void setPort(String port) {
             this.port = port;
         }
+
+        @Override
+        public String toString() {
+            return host + ":" + port;
+        }
     }
 
     // hosts 전체 리스트 접근용 getter

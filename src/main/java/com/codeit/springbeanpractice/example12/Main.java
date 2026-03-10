@@ -35,5 +35,8 @@ public class Main {
 
         context.getBean(InfoPrinter.class)
                 .printServers();
+
+        context.getBean(InfoPrinter.class)
+                .printTimeoutLevel();
     }
 }
